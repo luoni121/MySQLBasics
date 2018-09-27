@@ -1,4 +1,4 @@
-----------------1----------------
+#----------------1----------------
 
 CREATE TABLE minions (
 id INT(11) PRIMARY KEY AUTO_INCREMENT,
@@ -11,7 +11,7 @@ id INT(11) PRIMARY KEY AUTO_INCREMENT,
 name VARCHAR(30)
 );
 
-----------------2----------------
+#----------------2----------------
 
 ALTER TABLE minions
 ADD COLUMN town_id INT(11);
@@ -19,7 +19,7 @@ ADD COLUMN town_id INT(11);
 ALTER TABLE minions
 ADD CONSTRAINT fk_minions_towns FOREIGN KEY(town_id) REFERENCES towns(id);
 
-----------------3----------------
+#----------------3----------------
 
 INSERT INTO towns (id, name) VALUES (1,'Sofia');
 INSERT INTO towns (id, name) VALUES (2,'Plovdiv');
@@ -28,16 +28,16 @@ INSERT INTO minions (id,name, age, town_id) VALUES (1,'Kevin', 22, 1);
 INSERT INTO minions (id,name, age, town_id) VALUES (2,'Bob', 15, 3);
 INSERT INTO minions (id,name, age, town_id) VALUES (3,'Steward', null, 2);
 
-----------------4----------------
+#----------------4----------------
 
 TRUNCATE TABLE minions;
 
-----------------5----------------
+#----------------5----------------
 
 DROP TABLE minions;
 DROP TABLE towns;
 
-----------------6----------------
+#----------------6----------------
 
 CREATE TABLE people(
 id INT(11) PRIMARY KEY AUTO_INCREMENT UNIQUE,
@@ -57,7 +57,7 @@ VALUES(1,'Pesho',null,1.8,45.0,'m','1889-01-05','xchvjb'),
 (4,'Desho',null,3.8,47.0,'m','1989-01-05','xchvjb'),
 (5,'Aesho',null,4.8,57.0,'f','1879-01-08','hj');
 
-----------------8----------------
+#----------------8----------------
 
 SELECT * FROM users;
 
@@ -70,14 +70,14 @@ DROP PRIMARY KEY;
 Alter table users
 ADD PRIMARY KEY(id,username);
 
-----------------9----------------
+#----------------9----------------
 
 ALTER TABLE users
 MODIFY  COLUMN last_login_time 
 TIMESTAMP 
 NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
-----------------10----------------
+#----------------10----------------
 
 ALTER TABLE users
 MODIFY id INT(11) NOT NULL;
@@ -91,7 +91,7 @@ ADD CONSTRAINT pk_users PRIMARY KEY(id);
 ALTER TABLE users 
 ADD CONSTRAINT unique_username UNIQUE (username);
 
-----------------11----------------
+#----------------11----------------
 
 CREATE TABLE directors(
 id INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -139,7 +139,7 @@ INSERT INTO movies(id, title, director_id, copyright_year, length, genre_id, cat
 (4,'hh',1,'1990-08-06',125,2,1,4,'ahhaab'),
 (5,'ss',2,'1996-02-01',150,1,2,5,'aahaamb');
 
-----------------12----------------
+#----------------12----------------
 
 CREATE TABLE categories(
 id INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -215,7 +215,7 @@ notes TEXT
 INSERT INTO rental_orders(employee_id,customer_id,car_id)
 VALUES(1,2,3),(2,3,4),(3,4,5);
 
-----------------13----------------
+#----------------13----------------
 
 CREATE TABLE employees(
 id INT(11) AUTO_INCREMENT PRIMARY KEY,
@@ -309,7 +309,7 @@ notes TEXT
 INSERT INTO occupancies(id)
 VALUES(1),(2),(3);
 
-----------------14----------------
+#----------------14----------------
 
 CREATE TABLE towns(
 id INT(11) AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -345,7 +345,7 @@ CONSTRAINT fk_department_id FOREIGN KEY (department_id)
 REFERENCES  departments (id)  
 );
 
-----------------16----------------
+#----------------16----------------
 
 INSERT INTO towns(name)
 VALUES('Sofia'),('Plovdiv'),('Varna'),('Burgas');
@@ -360,25 +360,25 @@ VALUES('Ivan','Ivanov','Ivanov','.NET Developer',4,'2013-02-01','3500.00'),
 ('Georgi','Terziev','Ivanov','CEO',2,'2007-12-09','3000.00'),
 ('Peter','Pan','Pan','Intern',3,'2016-08-28','599.88');
 
-----------------17----------------
+#----------------17----------------
 
 SELECT * FROM towns;
 SELECT * FROM departments;
 SELECT * FROM employees;
 
-----------------18----------------
+#----------------18----------------
 
 SELECT * FROM towns ORDER BY name;
 SELECT * FROM departments ORDER BY name;
 SELECT * FROM employees ORDER BY salary DESC;
 
-----------------19----------------
+#----------------19----------------
 
 SELECT name FROM towns ORDER BY name;
 SELECT name FROM departments ORDER BY name;
 SELECT first_name,last_name,job_title,salary FROM employees ORDER BY salary DESC;
 
-----------------20----------------
+#----------------20----------------
 
 UPDATE employees
 SET salary=salary*1.1;
