@@ -123,10 +123,14 @@ ORDER BY iso_code;
 11.	 Mix of Peak and River Names
 ******************************************************/
 
-
-
-
-
+SELECT 
+    peak_name, river_name,
+    LOWER(CONCAT(peak_name, '', SUBSTRING(river_name, 2))) AS mix
+FROM
+    peaks, rivers
+WHERE
+    RIGHT(peak_name, 1) = LEFT(river_name, 1)
+ORDER BY mix ASC;
 
 /******************************************************
 12.	Games from 2011 and 2012 year
