@@ -136,7 +136,13 @@ ORDER BY mix ASC;
 12.	Games from 2011 and 2012 year
 ******************************************************/
 
-
+SELECT name, DATE_FORMAT(start,'%Y-%m-%d') AS start
+FROM
+   games
+WHERE
+    EXTRACT(YEAR FROM start) BETWEEN 2011 AND 2012
+    ORDER BY start, name
+    LIMIT 50;
 
 /******************************************************
 13.	 User Email Providers
