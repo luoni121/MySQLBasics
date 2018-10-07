@@ -134,34 +134,116 @@ ORDER BY deposit_group DESC , is_deposit_expired;
 12.	Rich Wizard, Poor Wizard*
 *******************************************/
 
+SELECT 
+    SUM(cq.difference) AS `sum_difference`
+FROM
+    (SELECT 
+        (wd1.deposit_amount - (SELECT 
+                    wd2.deposit_amount
+                FROM
+                    wizzard_deposits wd2
+                WHERE
+                    wd2.id = wd1.id + 1)) AS `difference`
+    FROM
+        wizzard_deposits wd1) AS `cq`;
+
 /*******************************************
 13. Employees Minimum Salaries
 *******************************************/
+
+SELECT 
+    e.department_id, MIN(e.salary) AS `minimum_salary`
+FROM
+    employees e
+WHERE
+    e.department_id IN (2 , 5, 7)
+	AND e.hire_date > '2000-01-01'
+GROUP BY department_id;
 
 /*******************************************
 14.	Employees Average Salaries
 *******************************************/
 
+CREATE TABLE highest_paid_employees AS
+SELECT * 
+FROM
+    employees e
+WHERE
+    e.salary > 30000;
+
+DELETE FROM highest_paid_employees 
+WHERE
+    manager_id = 42;
+ 
+UPDATE highest_paid_employees 
+SET 
+    salary = salary + 5000
+WHERE
+    department_id = 1;
+
+SELECT 
+    department_id, AVG(salary) AS `average_salary`
+FROM
+    highest_paid_employees
+GROUP BY department_id;
+
 /*******************************************
 15. Employees Maximum Salaries
 *******************************************/
+
+SELECT 
+    e.department_id, MAX(e.salary) AS `max_salary`
+FROM
+    employees e
+GROUP BY department_id
+HAVING NOT
+  `max_salary` BETWEEN 30000 AND 70000;
 
 /*******************************************
 16.	Employees Count Salaries
 *******************************************/
 
+SELECT COUNT(*) AS `count`
+  FROM employees e
+WHERE e.manager_id IS NULL;
+
 /*******************************************
 17.	3rd Highest Salary*
 *******************************************/
+
+SELECT e.department_id,
+	(SELECT DISTINCT e2.salary 
+		FROM employees e2 
+		WHERE e2.department_id = e.department_id
+		ORDER BY e2.salary DESC 
+        LIMIT 2, 1
+        ) AS `third_highest_salary`
+FROM employees e
+GROUP BY department_id
+HAVING `third_highest_salary` IS NOT NULL
+ORDER BY department_id;
 
 /*******************************************
 18. Salary Challenge**
 *******************************************/
 
+SELECT e.first_name, e.last_name, e.department_id
+FROM employees e
+WHERE e.salary > (
+	SELECT AVG(e2.salary) 
+    FROM employees e2 
+    WHERE e.department_id = e2.department_id)
+ORDER BY department_id, employee_id
+LIMIT 10;
+
 /*******************************************
 19.	Departments Total Salaries
 *******************************************/
 
+SELECT e.department_id, SUM(e.salary) AS `total_salary`
+FROM employees e
+GROUP BY e.department_id
+ORDER BY department_id;
 
 
 
