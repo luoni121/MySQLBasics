@@ -144,8 +144,8 @@ FROM
                     wizzard_deposits wd2
                 WHERE
                     wd2.id = wd1.id + 1)) AS `difference`
-    FROM
-        wizzard_deposits wd1) AS `cq`;
+FROM
+     wizzard_deposits wd1) AS `cq`;
 
 /*******************************************
 13. Employees Minimum Salaries
