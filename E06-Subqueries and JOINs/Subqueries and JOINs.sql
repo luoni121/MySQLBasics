@@ -85,56 +85,164 @@ ORDER BY e.hire_date;
 7.	Employees with Project
 *********************************************/
 
+SELECT e.employee_id, e.first_name, p.name AS `project_name`
+FROM
+    employees e
+JOIN
+    employees_projects ep ON e.employee_id = ep.employee_id
+ JOIN
+    projects p ON ep.project_id = p.project_id
+WHERE
+	DATE(p.start_date) > '2002-08-13'
+    AND p.end_date IS NULL
+ORDER BY e.first_name, p.name
+LIMIT 5;
+
 /*********************************************
 8.	Employee 24
 *********************************************/
 
+SELECT e.employee_id, e.first_name,
+	(CASE 
+		WHEN DATE(p.start_date) >'2004-12-31' THEN NULL
+		ELSE p.name
+	END) AS `project_name`
+FROM
+    employees e
+JOIN
+    employees_projects ep ON e.employee_id = ep.employee_id
+ JOIN
+    projects p ON ep.project_id = p.project_id
+WHERE
+	e.employee_id = 24
+ORDER BY project_name
+LIMIT 5;
 
 /*********************************************
 9.	Employee Manager
 *********************************************/
 
+SELECT e.employee_id, e.first_name, e.manager_id, m.first_name AS `manager_name`
+FROM
+    employees e
+INNER JOIN
+    employees m ON e.manager_id = m.employee_id
+WHERE
+	e.manager_id IN (3,7)
+ORDER BY e.first_name;
 
 /*********************************************
 10.	Employee Summary
 *********************************************/
 
+SELECT 
+    e.employee_id,
+    CONCAT(e.first_name, ' ', e.last_name) AS `employee_name`,
+    CONCAT(m.first_name, ' ', m.last_name) AS `manager_name`,
+    d.name AS `department_name`
+FROM
+    employees e
+INNER JOIN
+    employees m ON e.manager_id = m.employee_id
+JOIN
+    departments d ON d.department_id = e.department_id
+ORDER BY e.employee_id
+LIMIT 5;
 
 /*********************************************
 11.	Min Average Salary
 *********************************************/
 
+SELECT AVG(e.salary) AS `min_average_salary`
+FROM
+    employees e
+GROUP BY department_id   
+ORDER BY min_average_salary
+LIMIT 1;
 
 /*********************************************
 12.	Highest Peaks in Bulgaria
 *********************************************/
 
-
+SELECT mc.country_code, m.mountain_range, p.peak_name, p.elevation
+FROM
+    mountains m
+JOIN peaks p ON m.id = p.mountain_id
+JOIN mountains_countries mc ON m.id = mc.mountain_id
+WHERE p.elevation > 2835
+AND mc.country_code = 'BG'
+ORDER BY p.elevation DESC;
 
 /*********************************************
 13.	Count Mountain Ranges
 *********************************************/
 
+SELECT mc.country_code, COUNT(mc.mountain_id) AS `mountain_range`
+FROM
+    mountains_countries mc
+JOIN mountains m ON m.id = mc.mountain_id
+GROUP BY mc.country_code
+HAVING mc.country_code IN ('US','RU','BG')
+ORDER BY mountain_range DESC;
 
 /*********************************************
 14.	Countries with Rivers
 *********************************************/
 
+SELECT c.country_name, r.river_name
+FROM
+    countries c
+LEFT JOIN countries_rivers cr ON cr.country_code = c.country_code
+LEFT JOIN rivers r ON r.id = cr.river_id
+JOIN continents ct ON ct.continent_code = c.continent_code
+WHERE ct.continent_name = 'Africa'
+ORDER BY c.country_name
+LIMIT 5;
 
 /*********************************************
 15.	*Continents and Currencies
 *********************************************/
 
+SELECT continent_code, currency_code, COUNT(country_name) AS `currency_usage`
+FROM countries c
+GROUP BY continent_code, currency_code
+HAVING currency_usage = (
+	SELECT COUNT(country_code) AS `count`
+	FROM countries c1
+    	WHERE c1.continent_code = c.continent_code
+	GROUP BY currency_code
+	ORDER BY count DESC
+	LIMIT 1
+) AND currency_usage > 1
+ORDER BY continent_code, currency_code;
 
 /*********************************************
 16.	Countries without any Mountains
 *********************************************/
 
+SELECT COUNT(cq.country_name) AS `country_count`
+FROM(
+SELECT c.country_name, c.country_code, mc.mountain_id
+FROM
+    countries c
+LEFT JOIN mountains_countries mc ON c.country_code = mc.country_code
+WHERE mc.mountain_id IS NULL
+) AS cq;
+
 /*********************************************
 17.	Highest Peak and Longest River by Country
 *********************************************/
 
-
+SELECT c.country_name, MAX(p.elevation) AS `highest_peak_elevation`, MAX(r.length) AS `longest_river_length`
+FROM 
+    countries c
+LEFT JOIN mountains_countries mc ON c.country_code = mc.country_code
+LEFT JOIN peaks p ON p.mountain_id = mc.mountain_id
+LEFT JOIN countries_rivers AS cr ON c.country_code = cr.country_code
+LEFT JOIN rivers r ON cr.river_id = r.id
+GROUP BY c.country_name
+ORDER BY highest_peak_elevation DESC, longest_river_length DESC, c.country_name
+LIMIT 5;
 
 
 
