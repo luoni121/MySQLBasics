@@ -58,21 +58,80 @@ END
 5.	Salary Level Function
 *******************************************/
 
+DELIMITER $$
+CREATE FUNCTION ufn_get_salary_level(emp_salary DECIMAL(19,4))
+RETURNS VARCHAR(10)
+BEGIN
+	DECLARE result VARCHAR(10);
 
+    IF emp_salary < 30000 THEN SET result = 'Low';
+    ELSEIF emp_salary BETWEEN 30000 AND 50000 THEN SET result = 'Average';
+    ELSE SET result = 'High';
+    END IF;
+
+    RETURN result;
+END $$
 
 /*******************************************
 6.	Employees by Salary Level
 *******************************************/
 
+DELIMITER $$
+CREATE FUNCTION ufn_get_salary_level(emp_salary DECIMAL(19,4))
+RETURNS VARCHAR(10)
+BEGIN
+	DECLARE result VARCHAR(10);
+
+    IF emp_salary < 30000 THEN SET result = 'Low';
+    ELSEIF emp_salary BETWEEN 30000 AND 50000 THEN SET result = 'Average';
+    ELSE SET result = 'High';
+    END IF;
+
+    RETURN result;
+END $$
+
+#DROP PROCEDURE IF EXISTS usp_get_employees_by_salary_level;
+DELIMITER $$
+CREATE PROCEDURE usp_get_employees_by_salary_level (salary_lvl VARCHAR(10))
+BEGIN
+	SELECT e.first_name, e.last_name
+	FROM employees e
+	WHERE ufn_get_salary_level(e.salary) = salary_lvl
+    ORDER BY e.first_name DESC, e.last_name DESC;
+END $$
 
 /*******************************************
 7.	Define Function
 *******************************************/
 
+DELIMITER $$
+CREATE FUNCTION ufn_is_word_comprised(set_of_letters VARCHAR(50), word VARCHAR(50))  
+RETURNS BIT
+BEGIN
+	DECLARE result BIT;
+    DECLARE word_length INT(11);
+	DECLARE index_i INT(11); 
+    
+	SET result :=1;
+	SET word_length := CHAR_LENGTH(word);
+   	SET index_i := 1; 
+   
+	WHILE(index_i <= word_length) DO 
+	IF(set_of_letters NOT LIKE (CONCAT('%',SUBSTR(word, index_i, 1),'%'))) THEN
+		SET result := 0;
+	END IF;
+   
+	SET index_i = index_i + 1;
+	END WHILE;
+
+    RETURN result;
+END $$
 
 /*******************************************
 8.	Find Full Name
 *******************************************/
+
+
 
 
 /*******************************************
