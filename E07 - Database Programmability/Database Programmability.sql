@@ -245,7 +245,7 @@ BEGIN
 			SET stat = 0;
 		END IF;
         
-        IF amount < 0 THEN
+       		IF amount < 0 THEN
 			SET stat = 0;
 		END IF;
        
