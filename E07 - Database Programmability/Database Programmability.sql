@@ -131,22 +131,46 @@ END $$
 8.	Find Full Name
 *******************************************/
 
-
-
+CREATE PROCEDURE usp_get_holders_full_name ()  
+BEGIN
+	SELECT CONCAT(a.first_name,' ', a.last_name) AS `full_name`
+    FROM account_holders a
+    ORDER BY full_name, a.id;
+END
 
 /*******************************************
 9.	People with Balance Higher Than
 *******************************************/
-
+DELIMITER $$
+CREATE PROCEDURE usp_get_holders_with_balance_higher_than(min_balance DECIMAL (19,4))
+BEGIN
+SELECT first_name, last_name FROM
+	(
+    SELECT a.id, first_name, last_name, sum(a.balance) AS total_balance 
+	FROM account_holders AS ah
+	JOIN accounts a ON a.account_holder_id = ah.id
+	GROUP BY ah.first_name, ah.last_name
+    )
+AS result
+WHERE result.total_balance> min_balance
+ORDER BY  result.id;
+END $$
 
 /*******************************************
 10.	Future Value Function
 *******************************************/
 
+DELIMITER $$
+CREATE FUNCTION ufn_calculate_future_value(sum DOUBLE, yearly_interest_rate DOUBLE, years INT(11))
+RETURNS DOUBLE
+BEGIN
+	RETURN sum := sum * (POWER(1 + yearly_interest_rate, years));
+END $$
 
 /*******************************************
 11.	Calculating Interest
 *******************************************/
+
 
 
 
@@ -164,18 +188,114 @@ END $$
 14.	Money Transfer
 *******************************************/
 
+DELIMITER $$
+#DROP PROCEDURE IF EXISTS usp_transfer_money;
+CREATE PROCEDURE usp_transfer_money (from_account_id INT(11), to_account_id INT(11), amount DECIMAL (19,4))
+BEGIN
+	DECLARE stat INT;
+	SET stat = 1;
+
+	START TRANSACTION;
+		IF (SELECT COUNT(*)
+			FROM account_holders 
+			WHERE id = from_account_id OR id = to_account_id) < 2 THEN
+			SET stat = 0;
+		END IF;
+        
+        IF amount < 0 THEN
+			SET stat = 0;
+		END IF;
+       
+		IF (SELECT balance
+			FROM accounts
+			WHERE id = from_account_id) < amount THEN
+			SET stat = 0;
+		END IF;
+        
+		IF from_account_id = to_account_id THEN
+			SET stat = 0;
+		END IF;
+        
+        UPDATE accounts
+        SET balance = balance - amount
+        WHERE id = from_account_id;
+        
+		UPDATE accounts
+        SET balance = balance + amount
+        WHERE id = to_account_id;
+    
+		IF stat = 1
+        THEN COMMIT;
+        ELSE ROLLBACK;
+        END IF;	
+END $$
 
 /*******************************************
 15.	Log Accounts Trigger
 *******************************************/
 
+CREATE TABLE logs
+(
+log_id INT (11) PRIMARY KEY AUTO_INCREMENT,
+account_id INT(11),
+old_sum DECIMAL(19,4),
+new_sum DECIMAL(19,4)
+);
 
+DELIMITER $$
+CREATE TRIGGER tr_logs
+AFTER UPDATE
+ON accounts
+FOR EACH ROW
+BEGIN
+	INSERT INTO logs (account_id, old_sum, new_sum)
+	VALUES(OLD.id, OLD.balance, NEW.balance);
+END $$
 
 /*******************************************
 16.	Emails Trigger
 *******************************************/
 
+CREATE TABLE logs
+(
+log_id INT (11) PRIMARY KEY AUTO_INCREMENT,
+account_id INT(11),
+old_sum DECIMAL(19,4),
+new_sum DECIMAL(19,4)
+);
 
+DELIMITER $$
+CREATE TRIGGER tr_logs
+AFTER UPDATE
+ON accounts
+FOR EACH ROW
+BEGIN
+	INSERT INTO logs (account_id, old_sum, new_sum)
+	VALUES(OLD.id, OLD.balance, NEW.balance);
+END $$
+
+CREATE TABLE notification_emails (
+    id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    recipient INT(11) NOT NULL,
+    subject VARCHAR(50) NOT NULL,
+    body TEXT NOT NULL
+);
+ 
+DELIMITER $$
+CREATE TRIGGER tr_notification_emails
+AFTER INSERT 
+ON logs
+FOR EACH ROW
+BEGIN
+    INSERT INTO notification_emails
+        (recipient, subject, body)
+    VALUES (
+        NEW.account_id,
+        CONCAT('Balance change for account: ', NEW.account_id),
+        CONCAT('On ', DATE_FORMAT(NOW(), '%b %d %Y at %r'), 
+	       ' your balance was changed from ', 
+	       NEW.old_sum, ' to ', NEW.new_sum, '.'));
+END $$
 
 
 
