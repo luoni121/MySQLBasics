@@ -171,18 +171,61 @@ END $$
 11.	Calculating Interest
 *******************************************/
 
+DELIMITER $$
+CREATE FUNCTION ufn_calculate_future_value(sum decimal(19,4), yearly_interest_rate decimal(19,4), years INT(11))
+RETURNS decimal(19,4)
+BEGIN
+	SET sum := sum * (POWER(1 + yearly_interest_rate, years));
+	RETURN sum;
+END $$
 
-
+DELIMITER $$
+CREATE PROCEDURE usp_calculate_future_value_for_account (account_id INT(11), interest_rate decimal(19,4))
+BEGIN
+	SELECT a.id AS `account_id`, ah.first_name, ah.last_name, a.balance AS `current_balance`,
+			ufn_calculate_future_value(a.balance, interest_rate, 5) AS `balance_in_5_years`
+	FROM accounts a
+	JOIN account_holders ah ON a.account_holder_id = ah.id
+	WHERE a.id = account_id;
+END $$
 
 /*******************************************
 12.	Deposit Money
 *******************************************/
 
+DELIMITER $$
+CREATE PROCEDURE usp_deposit_money(account_id INT(11), money_amount DECIMAL (19, 4))
+BEGIN
+	IF money_amount > 0 THEN
+		START TRANSACTION;
+			UPDATE accounts AS a
+			SET balance = balance + money_amount
+			WHERE a.id = account_id;
+	END IF;
+END $$
 
 /*******************************************
 13.	Withdraw Money
 *******************************************/
 
+DELIMITER $$
+CREATE PROCEDURE usp_withdraw_money(account_id INT(11), money_amount DECIMAL(19, 4))
+BEGIN
+    IF (money_amount > 0) THEN
+		START TRANSACTION;
+        
+        IF (SELECT a.balance
+		FROM accounts AS a
+           	WHERE a.id = account_id) - money_amount< 0
+	THEN ROLLBACK;
+	ELSE
+    	    UPDATE accounts AS a
+		SET a.balance = a.balance - money_amount
+		WHERE a.id = account_id;
+	COMMIT;
+        END IF;
+    END IF;
+END $$
 
 /*******************************************
 14.	Money Transfer
